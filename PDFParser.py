@@ -1,6 +1,5 @@
 import pdfplumber as pr
 import csv
-import os
 from argparse import ArgumentParser
 
 # Get arguments
@@ -15,7 +14,6 @@ EARLIEST_YEAR = 105
 LATEST_YEAR = 112
 
 def parse_pdf(year):
-    dir = f'pdf/{year}'
     id_reader = csv.reader(open(f'csv/{year}/{year}_id.csv', "r"))
     id_header = next(id_reader)
     for [id, name] in id_reader:
@@ -44,7 +42,7 @@ def parse_pdf(year):
             for i in range(2, len(table)): # Skip header
                 arr = table[i]
                 code = arr[0]
-                name = arr[1]
+                name = arr[1].replace('\n', '')
                 quota = arr[2]
                 total = arr[3]
                 standards = arr[5].replace('--', '').split("\n")
