@@ -52,13 +52,7 @@ def download_pdf(year):
             headers = { 'User-Agent':random_agent }
 
             # Get pdf
-            match year:
-                case 112:
-                    url = f'https://www.cac.edu.tw/CacLink/star112/112pstar_W2_result_RW64tXZ3qa/html_112_K3tg/standard/one2seven/{id}/112Standard_{id}.pdf'
-                case 111:
-                    url = f'https://www.cac.edu.tw/CacLink/star111/111star_xresultPWB_8f2q2z3on/html_111_mqtz/standard/one2seven/{id}/111Standard_{id}.pdf'
-                case _:
-                    url = f'https://www.cac.edu.tw/cacportal/star_his_report/{year}/{year}_result_standard/one2seven/{id}/{year}Standard_{id}.pdf'
+            url = f'https://www.cac.edu.tw/cacportal/star_his_report/{year}/{year}_result_standard/one2seven/{id}/{year}Standard_{id}.pdf'
 
             response = requests.get(url, headers=headers)
             pdf = response.content
