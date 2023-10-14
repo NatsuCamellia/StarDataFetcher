@@ -22,12 +22,12 @@ if start_year > end_year:
     print("Error: Start year should not be later than end year")
     exit(1)
 
-def get_result(df: pd.DataFrame, code: str, year: int): # Get result of a department as a dict
+def get_result(df: pd.DataFrame, name: str, year: int): # Get result of a department as a dict
     if df is None:
         return None
     
     result = dict()
-    row = df[df['校系代碼'] == code]
+    row = df[df['校系名稱'] == name]
     if row.empty:
         return None
     result['year'] = year
@@ -88,15 +88,19 @@ def csv_to_json(school_id: str):
     if not os.path.exists(dir):
         os.makedirs(dir)
 
-    code_arr = dataframes[end_year]['校系代碼'].tolist()
-    for code in code_arr:
+    for (code, name) in dataframes[end_year].loc[:, '校系代碼':'校系名稱'].itertuples(index=False):
         json_dict = dict()
         json_dict['code'] = code
-        json_dict['name'] = dataframes[end_year][dataframes[end_year]['校系代碼'] == code]['校系名稱'].iloc[0]
+        json_dict['name'] = name
         print(f'Parsing {json_dict["name"]}({json_dict["code"]})...')
-        json_dict['results'] = list(get_result(dataframes[year], code, year) for year in range(start_year, end_year + 1))
+        results = list()
+        for year in range(start_year, end_year + 1):
+            result = get_result(dataframes[year], name, year)
+            if result is not None:
+                results.append(result)
+        json_dict['results'] = results
         
-        path = os.path.join(dir, f'{json_dict["code"]}.json')
+        path = os.path.join(dir, f'{json_dict["code"]} {json_dict["name"].replace("/", "")}.json')
         json.dump(json_dict, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     pass
 
