@@ -13,7 +13,7 @@ start_year = int(args.start)
 end_year = int(args.end)
 
 EARLIEST_YEAR = 105
-LATEST_YEAR = 112
+LATEST_YEAR = 113
 
 if start_year not in range(EARLIEST_YEAR, LATEST_YEAR + 1) or end_year not in range(EARLIEST_YEAR, LATEST_YEAR + 1):
     print("Error: Year should be in range {} to {}".format(EARLIEST_YEAR, LATEST_YEAR))
@@ -31,8 +31,14 @@ def get_result(df: pd.DataFrame, name: str, year: int): # Get result of a depart
     if row.empty:
         return None
     result['year'] = year
-    result['admissionAll'] = int(row['總錄取人數'].iloc[0])
-    result['admissionOne'] = int(row['第一輪錄取'].iloc[0])
+    if row['總錄取人數'].iloc[0] is None:
+        result['admissionAll'] = 0
+    else:
+        result['admissionAll'] = int(row['總錄取人數'].iloc[0])
+    if row['第一輪錄取'].iloc[0] is None:
+        result['admissionOne'] = 0
+    else:
+        result['admissionOne'] = int(row['第一輪錄取'].iloc[0])
     if row['第二輪錄取'].iloc[0] is None:
         result['admissionTwo'] = 0
     else:
@@ -47,14 +53,23 @@ def get_result(df: pd.DataFrame, name: str, year: int): # Get result of a depart
     # Get filters
     filter_arr = row['比序項目'].iloc[0].split("\n")
 
-    filter_one_arr = row['第一輪比序'].iloc[0].split("\n")
-    filter_one = [
-        {
-            "subject": filter_arr[i],
-            "value": filter_one_arr[i] if filter_one_arr[i] != '' else None
-        } for i in range(len(filter_arr))
-    ]
-    result['filterOne'] = filter_one
+    if result['admissionOne'] != 0:
+        filter_one_arr = row['第一輪比序'].iloc[0].split("\n")
+        filter_one = [
+            {
+                "subject": filter_arr[i],
+                "value": filter_one_arr[i] if filter_one_arr[i] != '' else None
+            } for i in range(len(filter_arr))
+        ]
+        result['filterOne'] = filter_one
+    else:
+        filter_one = [
+            {
+                "subject": filter_arr[i],
+                "value": None
+            } for i in range(len(filter_arr))
+        ]
+        result['filterOne'] = filter_one
 
     if result['admissionTwo'] != 0:
         filter_two_arr = row['第二輪比序'].iloc[0].split("\n")
@@ -100,7 +115,7 @@ def csv_to_json(school_id: str):
                 results.append(result)
         json_dict['results'] = results
         
-        path = os.path.join(dir, f'{json_dict["code"]} {json_dict["name"].replace("/", "")}.json')
+        path = os.path.join(dir, f'{json_dict["name"].replace("/", "")}.json')
         json.dump(json_dict, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     pass
 

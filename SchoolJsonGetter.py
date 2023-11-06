@@ -10,7 +10,7 @@ start_year = int(args.start)
 end_year = int(args.end)
 
 EARLIEST_YEAR = 105
-LATEST_YEAR = 112
+LATEST_YEAR = 113
 
 if start_year not in range(EARLIEST_YEAR, LATEST_YEAR + 1) or end_year not in range(EARLIEST_YEAR, LATEST_YEAR + 1):
     print("Error: Year should be in range {} to {}".format(EARLIEST_YEAR, LATEST_YEAR))
