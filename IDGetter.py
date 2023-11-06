@@ -38,7 +38,7 @@ start_year = int(args.start)
 end_year = int(args.end)
 
 EARLIEST_YEAR = 105
-LATEST_YEAR = 112
+LATEST_YEAR = 113
 
 if start_year not in range(EARLIEST_YEAR, LATEST_YEAR + 1) or end_year not in range(EARLIEST_YEAR, LATEST_YEAR + 1):
     print("Error: Year should be in range {} to {}".format(EARLIEST_YEAR, LATEST_YEAR))
@@ -47,15 +47,34 @@ if start_year > end_year:
     print("Error: Start year should not be later than end year")
     exit(1)
 
+def download_preview_id():
+    url = "https://www.cac.edu.tw/star113/system/ColQry_xforStu113Star_Qk65d4gZ4w/TotalGsdShow.htm"
+    r = requests.get(url, headers=headers)
+    r.encoding = "utf-8"
+    html = r.text
+    soup = bs(html, "html.parser")
+    results = soup.find_all("a")
+    
+    path = "csv/113"
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    file = open("csv/113/113_id.csv", "w", newline="")
+    writer = csv.writer(file)
+    writer.writerow(["ID", "Name"])
+    id = [0, 0]
+    for result in results:
+        text = result.text
+        id[0] = text[1:4]  # ID
+        dash_index = text.find("-")
+        id[1] = text[5:dash_index]   # Name
+        writer.writerow(id)
+
 def download_id(year):
+    if (year == 113):
+        return download_preview_id()
+    
     # Get data from CAC
-    match year:
-        case 112:
-            url = "https://www.cac.edu.tw/CacLink/star112/112pstar_W2_result_RW64tXZ3qa/html_112_K3tg/standard/one2seven/collegeList_1.php"
-        case 111:
-            url = "https://www.cac.edu.tw/CacLink/star111/111star_xresultPWB_8f2q2z3on/html_111_mqtz/standard/one2seven/collegeList_1.php"
-        case _:
-            url = f"https://www.cac.edu.tw/cacportal/star_his_report/{year}/{year}_result_standard/one2seven/collegeList_1.php"
+    url = f"https://www.cac.edu.tw/cacportal/star_his_report/{year}/{year}_result_standard/one2seven/collegeList_1.php"
     html = requests.get(url, headers=headers)
     soup = bs(html.text, "html.parser")
     results = soup.find_all("a")
